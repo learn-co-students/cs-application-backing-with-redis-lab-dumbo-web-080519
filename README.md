@@ -90,7 +90,13 @@ In the subdirectory `javacs-lab10/src/com/flatironschool/javacs` you'll find the
 
     *  `WikiFetcher.java` contains the code we saw in previous labs to read web pages and parse them using JSoup.
     
-    *  `Index.java` contains our solution to a previous lab, which implements an index with Java data structures.
+You'll also find these files, which are part of our solution to a previous lab.
+
+    *  `Index.java` implements an index using Java data structures.
+    
+    *  `TermCounter.java` represents a map from terms to their frequencies.
+    
+    *  `WikiNodeIterable.java` iterates through the nodes in a DOM tree produced by JSoup.
 
 Also, in `javacs-lab10`, you'll find the Ant build file `build.xml`.
 
@@ -138,7 +144,6 @@ Instead, we suggest you keep your password in an "environment variable", which i
 
 
 Now in `javacs-lab10`, run `ant build` to compile the source files and `ant JedisMaker` to run the example code in `main`:
-
 
 ```java
 	public static void main(String[] args) {
