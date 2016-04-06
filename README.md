@@ -4,7 +4,7 @@
 
 1.  Read and write data to a Redis database.
 2.  Translate Java data structures to Redis data structures.
-3.  Implement a Redis-backed Web seaarch index.
+3.  Implement a Redis-backed Web search index.
 
 
 ## Overview
@@ -364,5 +364,5 @@ Good luck!
 
 *  [JSON](https://en.wikipedia.org/wiki/JSON): Wikipedia.
 *  [Database managment systems](https://en.wikipedia.org/wiki/Database): Wikipedia.
-*  [Environment variables in Windows](http://www.computerhope.com/issues/ch000549.htm): Tutorial
+*  [Environment variables in Windows](http://www.computerhope.com/issues/ch000549.htm): tutorial.
 *  [Redis data types](http://redis.io/topics/data-types): documentation.
