@@ -161,10 +161,12 @@
             <classpath refid="JavaCS.classpath"/>
         </junit>
     </target>
+    <target depends="JedisIndexTest" name="test" \>
     <target name="JedisIndexTest">
         <mkdir dir="${junit.output.dir}"/>
         <junit fork="yes" printsummary="withOutAndErr">
             <formatter type="xml"/>
+            <formatter type="plain" usefile="no" />
             <test name="com.flatironschool.javacs.JedisIndexTest" todir="${junit.output.dir}"/>
             <env key="REDISTOGO_AUTH" value="2979811b19fe8895c14425ed5e694107"/>
             <classpath refid="JavaCS.classpath"/>
