@@ -1,6 +1,8 @@
 tags:
-  - a tag
+  - Redis
+  - Jedis
+  - web search
 languages:
-  - a language
+  - Java
 resources: 
-  - 0
+  - 4
