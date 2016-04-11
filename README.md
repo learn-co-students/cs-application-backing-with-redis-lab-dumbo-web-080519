@@ -1,6 +1,6 @@
 # cs-application-backing-with-redis-lab
 
-## Learning goals 
+## Learning goals
 
 1.  Read and write data to a Redis database.
 2.  Translate Java data structures to Redis data structures.
@@ -53,9 +53,9 @@ The database we recommend for this lab is Redis, which provides persistent data 
  * Lists of strings, similar to Java Lists.
  * Hashes, similar to Java Maps.
  * Sets of strings, similar Java Sets.
- 
+
  Redis is a "key-value database", which means that the data structures it contains (the values) are identified by unique strings (the keys).  A key in Redis plays the same role as a reference in Java: it identifies an object.  We'll see some examples soon.
- 
+
 
 ## Redis clients and servers
 
@@ -91,13 +91,13 @@ In the subdirectory `javacs-lab10/src/com/flatironschool/javacs` you'll find the
     *  `JedisIndexTest.java` contains test code for `JedisIndex`.
 
     *  `WikiFetcher.java` contains the code we saw in previous labs to read web pages and parse them using JSoup.
-    
+
 You'll also find these files, which are part of our solution to a previous lab.
 
     *  `Index.java` implements an index using Java data structures.
-    
+
     *  `TermCounter.java` represents a map from terms to their frequencies.
-    
+
     *  `WikiNodeIterable.java` iterates through the nodes in a DOM tree produced by JSoup.
 
 Also, in `javacs-lab10`, you'll find the Ant build file `build.xml`.
@@ -106,7 +106,7 @@ Before you run `JedisMaker`, you have to modify it to provide information about 
 
 ```java
 public class JedisMaker {
-	
+
 	public static Jedis make() {
 		String host = "dory.redistogo.com";
 		int port = 10534;
@@ -121,7 +121,7 @@ public class JedisMaker {
 			System.out.println("In Eclipse, select Run->Run configurations...");
 			System.out.println("Open the Environment tab, and add a new variable.");
 		}
-		
+
 		Jedis jedis = new Jedis(host, port);
 		jedis.auth(auth);
 		return jedis;
@@ -141,7 +141,7 @@ Instead, we suggest you keep your password in an "environment variable", which i
 * In Unix systems, including Mac OS X, you can set an environment variable on the command line like this:
 
     export REDISTOGO_AUTH="1234567890feedfacebeefa1e1234567"
-    
+
 * For Windows, [you can find instructions here](http://www.computerhope.com/issues/ch000549.htm).
 
 
@@ -149,28 +149,28 @@ Now in `javacs-lab10`, run `ant build` to compile the source files and `ant Jedi
 
 ```java
 	public static void main(String[] args) {
-		
+
 		Jedis jedis = make();
-		
+
 		// String
 		jedis.set("mykey", "myvalue");
 		String value = jedis.get("mykey");
 	    System.out.println("Got value: " + value);
-	    
+
 	    // Set
 	    jedis.sadd("myset", "element1", "element2", "element3");
 	    System.out.println("element2 is member: " + jedis.sismember("myset", "element2"));
-	    
+
 	    // List
 	    jedis.rpush("mylist", "element1", "element2", "element3");
 	    System.out.println("element at index 1: " + jedis.lindex("mylist", 1));
-	    
+
 	    // Hash
 	    jedis.hset("myhash", "word1", Integer.toString(2));
 	    jedis.hincrBy("myhash", "word2", 1);
 	    System.out.println("frequency of word1: " + jedis.hget("myhash", "word1"));
 	    System.out.println("frequency of word1: " + jedis.hget("myhash", "word2"));
-	    
+
 	    jedis.close();
 	}
 ```
@@ -182,7 +182,7 @@ This example demonstrates the data types and methods you are most likely to use 
     element at index 1: element2
     frequency of word1: 2
     frequency of word2: 1
-    
+
 In the next section, we'll explain how the code works.
 
 
@@ -261,14 +261,17 @@ Here's an example of how these methods are used:
         WikiFetcher wf = new WikiFetcher();
 		String url1 = "https://en.wikipedia.org/wiki/Java_(programming_language)";
 		Elements paragraphs = wf.readWikipedia(url1);
-		
+
 		Jedis jedis = JedisMaker.make();
 		JedisIndex index = new JedisIndex(jedis);
 		index.indexPage(url1, paragraphs);
 		Map<String, Integer> map = index.getCounts("the");
 ```
 
-If we look up `url1` in the result, `map`, we should get 339, which is the number times the word "the" appears on [the Java Wikipedia page](https://en.wikipedia.org/wiki/Java_(programming_language)) (that is, the version we saved).  If we index the same page again, the new results should replace the old ones.
+If we look up `url1` in the result, `map`, we should get 339, which is the
+number of times the word "the" appears on [the Java Wikipedia page](https://en.wikipedia.org/wiki/Java_(programming_language))
+(that is, the version we saved).  If we index the same page again, the new
+results should replace the old ones.
 
 You might want to start with a copy of `Index.java`, which contains our solution to the previous lab where we built an index using Java data structures.
 
@@ -289,7 +292,7 @@ At this point you have all the information you need to do the lab, so you can ge
 
 *   One of the challenges of working with persistent data is that it is persistent.  The structures stored in the database might change every time you run the program.  If you mess something up in the database, you will have to fix it or start over before you can proceed.  To help you keep things under control, we've provided methods called `deleteURLSets`, `deleteTermCounters`, and `deleteAllKeys`, which you can use to clean out the database and start fresh.  You can also use 'printIndex' to print the contents of the index.
 
-* Each time you invoke a `Jedis` method, your client sends a message to the server, then the server performs the action you requested and sends back a message.  If you perform many small operations, it will probably take a long time.  You can improve performance by grouping a series of operations into a `Transaction`.  
+* Each time you invoke a `Jedis` method, your client sends a message to the server, then the server performs the action you requested and sends back a message.  If you perform many small operations, it will probably take a long time.  You can improve performance by grouping a series of operations into a `Transaction`.
 
 For example, here's a simple version of `deleteAllKeys`:
 
@@ -322,7 +325,7 @@ Each time you invoke `del` would require a round-trip from the client to the ser
 
 Now you *really* have all the information you need; you should start working on the lab.  But if you get stuck, or if you really don't know how to get started, you can come back for a few more hints.
 
-**Don't read this until you have run the test code, tried out some basic Redis commands, and written a few methods in `JedisIndex.java`**.
+**Don't read the following until you have run the test code, tried out some basic Redis commands, and written a few methods in `JedisIndex.java`**.
 
 Ok, if you are really stuck, here are some methods you might want to work on:
 
@@ -331,9 +334,9 @@ Ok, if you are really stuck, here are some methods you might want to work on:
 	 * Checks whether we have a TermCounter for a given URL.
 	 */
 	public boolean isIndexed(String url) {}
-	
+
 	/**
-	 * Adds a URL to the set associated with `term`. 
+	 * Adds a URL to the set associated with `term`.
 	 */
 	public void add(String term, TermCounter tc) {}
 
