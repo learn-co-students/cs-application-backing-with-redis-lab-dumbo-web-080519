@@ -420,6 +420,20 @@
             <classpath refid="JavaCS.classpath"/>
         </junit>
     </target>
+    <target name="Card">
+        <java classname="com.flatironschool.javacs.Card" failonerror="true" fork="yes">
+            <classpath refid="JavaCS.classpath"/>
+        </java>
+    </target>
+    <target name="WikiCrawlerTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="com.flatironschool.javacs.WikiCrawlerTest" todir="${junit.output.dir}"/>
+            <env key="REDISTOGO_AUTH" value="2979811b19fe8895c14425ed5e694107"/>
+            <classpath refid="JavaCS.classpath"/>
+        </junit>
+    </target>
     <target name="junitreport">
         <junitreport todir="${junit.output.dir}">
             <fileset dir="${junit.output.dir}">
