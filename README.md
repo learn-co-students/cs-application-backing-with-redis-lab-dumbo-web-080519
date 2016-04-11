@@ -23,18 +23,18 @@ If you did the lab about the "Getting to Philosophy" conjecture, you built a cra
 
 And then, finally, you will work on the retrieval problem.
 
-In these labs, we will provide less starter code, and you will make more of the design decisions.  These labs are also more open-ended.  We will suggest some minimal goals you should try to reach, but there are many ways you can go farther if you want to challenge yourself.
+In these labs, we will provide less starter code, and you will make more design decisions.  These labs are also more open-ended.  We will suggest some minimal goals you should try to reach, but there are many ways you can go farther if you want to challenge yourself.
 
 Now, let's get started on a new version of the Indexer.
 
 
 ## Persistence
 
-The previous version of the Indexer stores the index in data structures: a `TermCounter` that maps from a search term to the number of times it appears on a web page, and an `Index` that maps from a search term to the set of pages where it appears.
+The previous version of the Indexer stores the index in two data structures: a `TermCounter` that maps from a search term to the number of times it appears on a web page, and an `Index` that maps from a search term to the set of pages where it appears.
 
-These data structures are stored in the memory of a running Java program, which means that when the program stops running, the index is lost.  Data that is stored only in the memory of a running program is called "volatile", because it vaporizes when the program ends.
+These data structures are stored in the memory of a running Java program, which means that when the program stops running, the index is lost.  Data stored only in the memory of a running program is called "volatile", because it vaporizes when the program ends.
 
-Data that persists after the program that created it has ended is called "persistent".  In general, files stored in a file system are persistent, as well as data stored in databases.
+Data that persists after the program that created it ends is called "persistent".  In general, files stored in a file system are persistent, as well as data stored in databases.
 
 A simple way to make data persistent is to store it in a file.  Before the program ends, it could translate its data structures into a format like [JSON](https://en.wikipedia.org/wiki/JSON) and then write them into a file.  When it starts again, it could read the file and rebuild the data structures.
 
@@ -46,7 +46,7 @@ But there are several problems with this solution:
 
 A better alternative is a database that provides persistent storage and the ability to read and write parts of the database without reading and writing the whole thing.
 
-There are many kinds of database management system (DBMS) that provide different capabilities.  You can read an [overview on this Wikipedia page](https://en.wikipedia.org/wiki/Database).
+There are many kinds of database management systems (DBMS) that provide different capabilities.  You can read an [overview on this Wikipedia page](https://en.wikipedia.org/wiki/Database).
 
 The database we recommend for this lab is Redis, which provides persistent data structures that are similar to Java data structures.  Specifically, it provides:
 
@@ -54,7 +54,7 @@ The database we recommend for this lab is Redis, which provides persistent data 
  * Hashes, similar to Java Maps.
  * Sets of strings, similar Java Sets.
 
- Redis is a "key-value database", which means that the data structures it contains (the values) are identified by unique strings (the keys).  A key in Redis plays the same role as a reference in Java: it identifies an object.  We'll see some examples soon.
+Redis is a "key-value database", which means that the data structures it contains (the values) are identified by unique strings (the keys).  A key in Redis plays the same role as a reference in Java: it identifies an object.  We'll see some examples soon.
 
 
 ## Redis clients and servers
@@ -92,7 +92,7 @@ In the subdirectory `javacs-lab10/src/com/flatironschool/javacs` you'll find the
 
     *  `WikiFetcher.java` contains the code we saw in previous labs to read web pages and parse them using JSoup.
 
-You'll also find these files, which are part of our solution to a previous lab.
+You'll also find these files, which are part of our solution to previous labs.
 
     *  `Index.java` implements an index using Java data structures.
 
@@ -102,48 +102,55 @@ You'll also find these files, which are part of our solution to a previous lab.
 
 Also, in `javacs-lab10`, you'll find the Ant build file `build.xml`.
 
-Before you run `JedisMaker`, you have to modify it to provide information about your server.  If you open `JedisMaker.java`, you should see something like this:
+The first step is to use Jedis to connect to your Redis server.  `RedisMaker.java` shows how to do this.  It reads information about your Redis server from a file, connects to it and logs in using your password, then returns a `Jedis` object you can use to perform Redis operations.
+
+If you open `JedisMaker.java`, you should see something like this (but with more error checking):
 
 ```java
 public class JedisMaker {
 
 	public static Jedis make() {
-		String host = "dory.redistogo.com";
-		int port = 10534;
-		String auth = System.getenv("REDISTOGO_AUTH");
+		// assemble the directory name
+		String slash = File.separator;
+		String filename = System.getProperty("user.dir") + slash + 
+				"src" + slash + "resources" + slash + "redis_url.txt";
 
-		if (auth == null) {
-			System.out.println("To connect to RedisToGo, you have to create an environment");
-			System.out.println("variable named REDISTOGO_AUTH that contains your authorization");
-			System.out.println("code.  If you select and instance on the RedisToGo web page,");
-			System.out.println("you should see a URL that contains the information you need:");
-			System.out.println("redis://redistogo:AUTH_CODE@HOST:PORT");
-			System.out.println("In Eclipse, select Run->Run configurations...");
-			System.out.println("Open the Environment tab, and add a new variable.");
+		// read the contents of the file into a string
+		StringBuilder sb = new StringBuilder();
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		while (true) {
+			String line = br.readLine();
+			if (line == null) break;
+			sb.append(line);
 		}
-
+		br.close();
+		
+		// extract the components from the URI
+		URI uri = new URI(sb.toString());
+		String host = uri.getHost();
+		int port = uri.getPort();
+		String[] array = uri.getAuthority().split("[:@]");
+		String auth = array[1];
+		
+		// connect to the server and authenticate
 		Jedis jedis = new Jedis(host, port);
 		jedis.auth(auth);
+	
 		return jedis;
 	}
 ```
 
 `JedisMaker` is a helper class that provides one static method, `make`, which creates a `Jedis` object.  Once this object is authenticated (by invoking `auth`), you can use it to communicate with your Redis database.
 
-To keep things simple, the host name and port number are "hard-coded", which means they are part of the program.  You should replace these values with the host name and port number of your instance.
+`JedisMaker` reads information about your Redis server from a file named `redis_url.txt`, which you should put in the directory `javacs-lab10/src/resources`:
 
-Hard coding the password is not a good idea; if you put your password in the source code and then put your code in a public repository (on GitHub, for example), anyone would be able to use your database for anything.
+*   Use a text editor to create end edit `javacs-lab10/src/resources/redis_url.txt`.
 
-Instead, we suggest you keep your password in an "environment variable", which is a variable stored in the run-time environment of the program rather than in the source code.  The details depend on where and how you run programs:
+*   Paste in the URL of your server.  If you are using RedisToGo, the URL will look like this:
 
-* In Eclipse, select `Run Configurations...` from the `Run` menu, then open the `Environment` tab, and add a new variable.  The name of the variable should be `REDISTOGO_AUTH`, and the value should be your password.
+    redis://redistogo:1234567890feedfacebeefa1e1234567@dory.redistogo.com:10534   
 
-* In Unix systems, including Mac OS X, you can set an environment variable on the command line like this:
-
-    export REDISTOGO_AUTH="1234567890feedfacebeefa1e1234567"
-
-* For Windows, [you can find instructions here](http://www.computerhope.com/issues/ch000549.htm).
-
+Because this file contains the password for your Redis server, you should not put this file in a public repository.  To help you avoid doing that by accident, we have provided a `.gitignore` file with this lab that should make it harder (but not impossible) to put this file in your repo.
 
 Now in `javacs-lab10`, run `ant build` to compile the source files and `ant JedisMaker` to run the example code in `main`:
 
@@ -151,27 +158,27 @@ Now in `javacs-lab10`, run `ant build` to compile the source files and `ant Jedi
 	public static void main(String[] args) {
 
 		Jedis jedis = make();
-
+		
 		// String
 		jedis.set("mykey", "myvalue");
 		String value = jedis.get("mykey");
-	    System.out.println("Got value: " + value);
-
-	    // Set
-	    jedis.sadd("myset", "element1", "element2", "element3");
-	    System.out.println("element2 is member: " + jedis.sismember("myset", "element2"));
-
-	    // List
-	    jedis.rpush("mylist", "element1", "element2", "element3");
-	    System.out.println("element at index 1: " + jedis.lindex("mylist", 1));
-
-	    // Hash
-	    jedis.hset("myhash", "word1", Integer.toString(2));
-	    jedis.hincrBy("myhash", "word2", 1);
-	    System.out.println("frequency of word1: " + jedis.hget("myhash", "word1"));
-	    System.out.println("frequency of word1: " + jedis.hget("myhash", "word2"));
-
-	    jedis.close();
+		System.out.println("Got value: " + value);
+		
+		// Set
+		jedis.sadd("myset", "element1", "element2", "element3");
+		System.out.println("element2 is member: " + jedis.sismember("myset", "element2"));
+		
+		// List
+		jedis.rpush("mylist", "element1", "element2", "element3");
+		System.out.println("element at index 1: " + jedis.lindex("mylist", 1));
+		
+		// Hash
+		jedis.hset("myhash", "word1", Integer.toString(2));
+		jedis.hincrBy("myhash", "word2", 1);
+		System.out.println("frequency of word1: " + jedis.hget("myhash", "word1"));
+		System.out.println("frequency of word1: " + jedis.hget("myhash", "word2"));
+		
+		jedis.close();
 	}
 ```
 
@@ -204,7 +211,7 @@ A Redis `Set` is similar to a Java `Set<String>`.  To add elements to a set, you
         boolean flag = jedis.sismember("myset", "element2");
 ```
 
-You don't have to create the Set as a separate step.  If it doesn't exist, Redis creates it.
+You don't have to create the Set as a separate step.  If it doesn't exist, Redis creates it.  In this case, it creates a Set named `myset` that contains three elements.
 
 The method `jedis.sismember` checks whether an element is in a Set.  Adding elements and checking membership are constant time operations.
 
@@ -215,7 +222,9 @@ A Redis `List` is similar to a Java `List<String>`.  The method `jedis.rpush` ad
         String element = jedis.lindex("mylist", 1);
 ```
 
-Again, you don't have to create the data structure before you start adding elements.  The method `jedis.lindex` takes an integer index and returns the indicated element.  Adding and accessing elements are constant time operations.
+Again, you don't have to create the data structure before you start adding elements.  This example creates a List named "mylist" that contains three elements.
+
+The method `jedis.lindex` takes an integer index and returns the indicated element.  Adding and accessing elements are constant time operations.
 
 Finally, a Redis `Hash` is similar to a Java `Map<String, String>`.  The method `jedis.hset` adds a new entry to the hash:
 
@@ -224,9 +233,11 @@ Finally, a Redis `Hash` is similar to a Java `Map<String, String>`.  The method 
         String value = jedis.hget("myhash", "word1");
 ```
 
-In this example, the value we want to store is an `Integer`, so we have to convert it to a `String`.  When we look up the value using `jedis.hget`, the result is a `String`.
+This example creates a Hash named `myhash` that contains one entry.
 
-Working with Redis hashes can be confusing, because we use a key to identify which hash we want, and then another key to identify a value in the hash.  In the context of Redis, the second key is called a "field", which might help keep things straight.  So a "key" identifies a particular hash, and then a "field" identifies a value in the hash.
+The value it stores is an `Integer`, so we have to convert it to a `String`.  When we look up the value using `jedis.hget`, the result is a `String`.
+
+Working with Redis hashes can be confusing, because we use a key to identify which hash we want, and then another key to identify a value in the hash.  In the context of Redis, the second key is called a "field", which might help keep things straight.  So a "key" like `myhash` identifies a particular hash, and then a "field" like `word1` identifies a value in the hash.
 
 For many applications, the values in a Redis hash are integers, so Redis provides a few special methods, like `hincrby`, that treat the values as integers:
 
@@ -234,7 +245,7 @@ For many applications, the values in a Redis hash are integers, so Redis provide
         jedis.hincrBy("myhash", "word2", 1);
 ```
 
-This method accesses "myhash", gets the current value associated with "word2" (or 0 if it doesn't already exist), increments it by 1, and writes the result back to the hash.
+This method accesses `myhash`, gets the current value associated with `word2` (or 0 if it doesn't already exist), increments it by 1, and writes the result back to the hash.
 
 Setting, getting, and incrementing entries in a hash are constant time operations.
 
@@ -243,7 +254,7 @@ You can [read more about Redis data types here](http://redis.io/topics/data-type
 
 ## Making a Jedis-backed index
 
-At this point you have the information you need to make a Web search index that stores the results in a Redis database.
+At this point you have the information you need to make a Web search index that stores results in a Redis database.
 
 In `javacs-lab10`, run `ant build` to compile the source files and `ant test` to run `JedisIndexTest`.  It should fail, because you have some work to do!
 
@@ -269,17 +280,17 @@ Here's an example of how these methods are used:
 ```
 
 If we look up `url1` in the result, `map`, we should get 339, which is the
-number of times the word "the" appears on [the Java Wikipedia page](https://en.wikipedia.org/wiki/Java_(programming_language))
-(that is, the version we saved).  If we index the same page again, the new
-results should replace the old ones.
+number of times the word "the" appears on [the Java Wikipedia page](https://en.wikipedia.org/wiki/Java_(programming_language)) (that is, the version we saved).
+
+If we index the same page again, the new results should replace the old ones.
 
 You might want to start with a copy of `Index.java`, which contains our solution to the previous lab where we built an index using Java data structures.
 
-One suggestion for translating data structures from Java to Redis: remember that each object in a Redis database is identified by a unique key, which is a string.  If you have two kinds of objects in the same database, you might want to add a prefix to the keys so you distinguish between them.  For example, in our solution, we have two kinds of objects:
+One suggestion for translating data structures from Java to Redis: remember that each object in a Redis database is identified by a unique key, which is a string.  If you have two kinds of objects in the same database, you might want to add a prefix to the keys to distinguish between them.  For example, in our solution, we have two kinds of objects:
 
 *  We define a `URLSet` to be a Redis `Set` that contains the URLs that contain a given search term.  The key for each `URLSet` starts with `"URLSet:"`, so to get the URLs that contain the word "the", we access the `Set` with the key `"URLSet:the"`.
 
-* We define a `TermCounter` to be a Redis `Hash` that maps from each term that appears on page to the number of times it appears.  The key for each TermCounter starts with `"TermCounter:"` and ends with the URL of the page we're looking up.
+* We define a `TermCounter` to be a Redis `Hash` that maps from each term that appears on a page to the number of times it appears.  The key for each TermCounter starts with `"TermCounter:"` and ends with the URL of the page we're looking up.
 
 In our implementation, we have one `URLSet` for each term and one `TermCounter` for each indexed page.  We provide two helper methods, `urlSetKey` and `termCounterKey`, to assemble these keys.
 
@@ -290,7 +301,7 @@ At this point you have all the information you need to do the lab, so you can ge
 
 *   For this lab we provide less guidance than we did in previous labs.  You will have to make some design decisions; in particular, you will have to figure out how to divide the problem into pieces that you can test one at a time, and then assemble the pieces into a complete solution.  If you try to write the whole thing at once, without testing smaller pieces, it might take a very long time to debug.
 
-*   One of the challenges of working with persistent data is that it is persistent.  The structures stored in the database might change every time you run the program.  If you mess something up in the database, you will have to fix it or start over before you can proceed.  To help you keep things under control, we've provided methods called `deleteURLSets`, `deleteTermCounters`, and `deleteAllKeys`, which you can use to clean out the database and start fresh.  You can also use 'printIndex' to print the contents of the index.
+*   One of the challenges of working with persistent data is that it is persistent.  The structures stored in the database might change every time you run the program.  If you mess something up in the database, you will have to fix it or start over before you can proceed.  To help you keep things under control, we've provided methods called `deleteURLSets`, `deleteTermCounters`, and `deleteAllKeys`, which you can use to clean out the database and start fresh.  You can also use `printIndex` to print the contents of the index.
 
 * Each time you invoke a `Jedis` method, your client sends a message to the server, then the server performs the action you requested and sends back a message.  If you perform many small operations, it will probably take a long time.  You can improve performance by grouping a series of operations into a `Transaction`.
 
@@ -305,7 +316,7 @@ For example, here's a simple version of `deleteAllKeys`:
 	}
 ```
 
-Each time you invoke `del` would require a round-trip from the client to the server and back.  If the index contains more than a few pages, this version would take a long time to run.  We can speed it up with a `Transaction` object:
+Each time you invoke `del` requirex a round-trip from the client to the server and back.  If the index contains more than a few pages, this method would take a long time to run.  We can speed it up with a `Transaction` object:
 
 ```java
 	public void deleteAllKeys() {
@@ -318,7 +329,7 @@ Each time you invoke `del` would require a round-trip from the client to the ser
 	}
 ```
 
-`jedis.multi` returns a `Transaction` object, which provides all the same methods provided by a `Jedis` object.  But when you invoke a method on a `Transaction`, it doesn't run the operation immediately, and it doesn't communicate with the server.  It saves up a batch of operations until you invoke `exec`.  Then it sends all of the saved operations to the server at the same time, which is usually much faster.
+`jedis.multi` returns a `Transaction` object, which provides all the methods of a `Jedis` object.  But when you invoke a method on a `Transaction`, it doesn't run the operation immediately, and it doesn't communicate with the server.  It saves up a batch of operations until you invoke `exec`.  Then it sends all of the saved operations to the server at the same time, which is usually much faster.
 
 
 ## A few design hints
