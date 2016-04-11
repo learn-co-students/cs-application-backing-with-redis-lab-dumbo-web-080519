@@ -161,7 +161,7 @@
             <classpath refid="JavaCS.classpath"/>
         </junit>
     </target>
-    <target depends="JedisIndexTest" name="test" \>
+    <target depends="JedisIndexTest" name="test" />
     <target name="JedisIndexTest">
         <mkdir dir="${junit.output.dir}"/>
         <junit fork="yes" printsummary="withOutAndErr">
