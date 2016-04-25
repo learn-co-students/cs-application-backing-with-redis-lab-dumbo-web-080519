@@ -407,11 +407,6 @@
             <classpath refid="JavaCS.classpath"/>
         </java>
     </target>
-    <target name="WikiSorter">
-        <java classname="com.flatironschool.javacs.WikiSorter" failonerror="true" fork="yes">
-            <classpath refid="JavaCS.classpath"/>
-        </java>
-    </target>
     <target name="WikiPhilosophyTest">
         <mkdir dir="${junit.output.dir}"/>
         <junit fork="yes" printsummary="withOutAndErr">
@@ -431,6 +426,27 @@
             <formatter type="xml"/>
             <test name="com.flatironschool.javacs.WikiCrawlerTest" todir="${junit.output.dir}"/>
             <env key="REDISTOGO_AUTH" value="2979811b19fe8895c14425ed5e694107"/>
+            <classpath refid="JavaCS.classpath"/>
+        </junit>
+    </target>
+    <target name="WikiSearchTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="com.flatironschool.javacs.WikiSearchTest" todir="${junit.output.dir}"/>
+            <classpath refid="JavaCS.classpath"/>
+        </junit>
+    </target>
+    <target name="ListSorter">
+        <java classname="com.flatironschool.javacs.ListSorter" failonerror="true" fork="yes">
+            <classpath refid="JavaCS.classpath"/>
+        </java>
+    </target>
+    <target name="ListSorterTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="com.flatironschool.javacs.ListSorterTest" todir="${junit.output.dir}"/>
             <classpath refid="JavaCS.classpath"/>
         </junit>
     </target>
