@@ -84,21 +84,21 @@ When you check out the repository for this lab, you should find a file structure
 
 In the subdirectory `javacs-lab10/src/com/flatironschool/javacs` you'll find the source files for this lab:
 
-    *  `JedisMaker.java` contains example code for connecting to a Redis server and running a few Jedis methods.
+*  `JedisMaker.java` contains example code for connecting to a Redis server and running a few Jedis methods.
 
-    *  `JedisIndex.java` contains starter code for this lab.
+*  `JedisIndex.java` contains starter code for this lab.
 
-    *  `JedisIndexTest.java` contains test code for `JedisIndex`.
+*  `JedisIndexTest.java` contains test code for `JedisIndex`.
 
-    *  `WikiFetcher.java` contains the code we saw in previous labs to read web pages and parse them using JSoup.
+*  `WikiFetcher.java` contains the code we saw in previous labs to read web pages and parse them using JSoup.
 
 You'll also find these files, which are part of our solution to previous labs.
 
-    *  `Index.java` implements an index using Java data structures.
+*  `Index.java` implements an index using Java data structures.
 
-    *  `TermCounter.java` represents a map from terms to their frequencies.
+*  `TermCounter.java` represents a map from terms to their frequencies.
 
-    *  `WikiNodeIterable.java` iterates through the nodes in a DOM tree produced by JSoup.
+*  `WikiNodeIterable.java` iterates through the nodes in a DOM tree produced by JSoup.
 
 Also, in `javacs-lab10`, you'll find the Ant build file `build.xml`.
 
@@ -341,11 +341,6 @@ Now you *really* have all the information you need; you should start working on 
 Ok, if you are really stuck, here are some methods you might want to work on:
 
 ```java
-	/**
-	 * Checks whether we have a TermCounter for a given URL.
-	 */
-	public boolean isIndexed(String url) {}
-
 	/**
 	 * Adds a URL to the set associated with `term`.
 	 */
