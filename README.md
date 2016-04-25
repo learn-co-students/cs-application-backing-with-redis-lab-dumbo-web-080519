@@ -269,7 +269,7 @@ In `javacs-lab10`, run `ant build` to compile the source files and `ant test` to
 Here's an example of how these methods are used:
 
 ```java
-        	WikiFetcher wf = new WikiFetcher();
+        WikiFetcher wf = new WikiFetcher();
 		String url1 = "https://en.wikipedia.org/wiki/Java_(programming_language)";
 		Elements paragraphs = wf.readWikipedia(url1);
 
