@@ -342,11 +342,6 @@ Ok, if you are really stuck, here are some methods you might want to work on:
 
 ```java
 	/**
-	 * Checks whether we have a TermCounter for a given URL.
-	 */
-	public boolean isIndexed(String url) {}
-
-	/**
 	 * Adds a URL to the set associated with `term`.
 	 */
 	public void add(String term, TermCounter tc) {}
