@@ -144,7 +144,7 @@ public class JedisMaker {
 
 `JedisMaker` reads information about your Redis server from a file named `redis_url.txt`, which you should put in the directory `javacs-lab10/src/resources`:
 
-*   Use a text editor to create end edit `javacs-lab10/src/resources/redis_url.txt`.
+*   Use a text editor to create and edit `javacs-lab10/src/resources/redis_url.txt`.
 
 *   Paste in the URL of your server.  If you are using RedisToGo, the URL will look like this:
 
@@ -375,3 +375,5 @@ Good luck!
 *  [Database managment systems](https://en.wikipedia.org/wiki/Database): Wikipedia.
 *  [Environment variables in Windows](http://www.computerhope.com/issues/ch000549.htm): tutorial.
 *  [Redis data types](http://redis.io/topics/data-types): documentation.
+
+<p class='util--hide'>View <a href='https://learn.co/lessons/cs-application-backing-with-redis-lab'>Backing with Redis Lab</a> on Learn.co and start learning to code for free.</p>
