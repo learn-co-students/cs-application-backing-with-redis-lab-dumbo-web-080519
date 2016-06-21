@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import redis.clients.jedis.Jedis;
 
@@ -26,16 +27,14 @@ public class JedisMaker {
 
 		// assemble the directory name
 		String slash = File.separator;
-		// String filename = System.getProperty("user.dir") + slash +
-		// 		"src" + slash + "resources" + slash + "redis_url.txt";
-
-    String filename = "resources" + slash + "redis_url.txt";
+                String filename = "resources" + slash + "redis_url.txt";
 		URL fileURL = JedisMaker.class.getClassLoader().getResource(filename);
+                String filepath = URLDecoder.decode(fileURL.getFile(), "UTF-8");
+                StringBuilder sb = new StringBuilder();
 
-	  StringBuilder sb = new StringBuilder();
-		BufferedReader br;
+                BufferedReader br;
 		try {
-			br = new BufferedReader(new FileReader(fileURL.getFile()));
+                    br = new BufferedReader(new FileReader(filepath));
 		} catch (FileNotFoundException e1) {
 			System.out.println("File not found: " + filename);
 			printInstructions();
